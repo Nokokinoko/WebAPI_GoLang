@@ -1,0 +1,5 @@
+# Logs
+/logs/*
+
+# Editor
+*.code-workspace
