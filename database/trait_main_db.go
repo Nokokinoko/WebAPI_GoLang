@@ -27,22 +27,22 @@ func (table abstractTable) Update(record abstractRecord) error {
 	var sqlWhere []string
 	var sqlSets []string
 	var sqlPhs []string
-	for _, key := range table.keys() {
+	for _, col := range record.columns() {
 		// check in array
 		var isInclude bool = false
 		for _, specifyKey := range specifyKeys {
-			if key == specifyKey {
+			if col == specifyKey {
 				isInclude = true
 				break
 			}
 		}
 
 		if isInclude {
-			sqlWhere = append(sqlWhere, key+" = ?")
+			sqlWhere = append(sqlWhere, col+" = ?")
 		} else {
-			sqlSets = append(sqlSets, key+" = ?")
+			sqlSets = append(sqlSets, col+" = ?")
 		}
-		val := reflectRecord.FieldByName(key)
+		val := reflectRecord.FieldByName(col)
 		sqlPhs = append(sqlPhs, val.String())
 	}
 
@@ -86,13 +86,13 @@ func (table abstractTable) Insert(record abstractRecord) (abstractRecord, error)
 	// create sql
 	var sqlKeys []string
 	var sqlPhs []string
-	for _, key := range table.keys() {
-		if key == table.primaryKey {
+	for _, col := range record.columns() {
+		if col == table.primaryKey {
 			continue
 		}
 
-		sqlKeys = append(sqlKeys, key)
-		val := reflectRecord.FieldByName(key)
+		sqlKeys = append(sqlKeys, col)
+		val := reflectRecord.FieldByName(col)
 		sqlPhs = append(sqlPhs, val.String())
 	}
 

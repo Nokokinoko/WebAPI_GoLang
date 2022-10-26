@@ -7,6 +7,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+// ------ Database ------
 type singletonDb struct {
 	db *sql.DB
 }
@@ -60,21 +61,40 @@ func Instance(dbName string, isMain bool) *singletonDb {
 	}
 }
 
+// ------ Record ------
+type IRecord interface {
+	columns() []string
+	assignRow(row *sql.Row) error
+	assignRows(rows *sql.Rows) error
+}
+
 type abstractRecord struct {
 }
 
+func (record abstractRecord) columns() []string {
+	return []string{}
+}
+
+func (record abstractRecord) assignRow(row *sql.Row) error {
+	return nil
+}
+
+func (record abstractRecord) assignRows(rows *sql.Rows) error {
+	return nil
+}
+
+// ------ Table ------
 type ITable interface {
-	keys() []string
 	specifyKeys(usePrimaryKey bool) []string
 	emptyRecord() abstractRecord
 
 	Update(record abstractRecord) error
-	Insert(record abstractRecord) abstractRecord
-	Delete() error
+	Insert(record abstractRecord) (abstractRecord, error)
+	Delete(mapKeyVal map[string]string) error
 
-	Rows() []abstractRecord
-	Row() abstractRecord
-	Count() int
+	Rows(mapKeyVal map[string]string) ([]abstractRecord, error)
+	Row(usePrimaryKey bool, mapKeyVal map[string]string) (abstractRecord, error)
+	Count(mapKeyVal map[string]string) (int, error)
 }
 
 type abstractTable struct {
@@ -82,11 +102,6 @@ type abstractTable struct {
 	tableName    string
 	primaryKey   string
 	uniqueKeys   []string
-}
-
-func (table abstractTable) keys() []string {
-	var keys []string
-	return keys
 }
 
 func (table abstractTable) specifyKeys(usePrimaryKey bool) []string {
